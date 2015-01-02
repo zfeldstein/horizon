@@ -261,7 +261,7 @@ ADD_INSTALLED_APPS = []
 CUSTOM_THEME_PATH = 'static/themes/default'
 
 try:
-    from local.local_settings import *  # noqa
+    from local_settings import *  # noqa
 except ImportError:
     logging.warning("No local_settings file found.")
 
