@@ -313,7 +313,7 @@ SECURITY_GROUP_RULES = {
 }
 
 try:
-    from local.local_settings import *  # noqa
+    from local_settings import *  # noqa
 except ImportError:
     logging.warning("No local_settings file found.")
 
