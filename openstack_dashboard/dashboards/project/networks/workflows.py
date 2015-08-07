@@ -36,13 +36,6 @@ class CreateNetworkInfoAction(workflows.Action):
     net_name = forms.CharField(max_length=255,
                                label=_("Network Name"),
                                required=False)
-    if api.neutron.is_port_profiles_supported():
-        widget = None
-    else:
-        widget = forms.HiddenInput()
-    net_profile_id = forms.ChoiceField(label=_("Network Profile"),
-                                       required=False,
-                                       widget=widget)
 
     admin_state = forms.ChoiceField(choices=[(True, _('UP')),
                                              (False, _('DOWN'))],
@@ -53,26 +46,6 @@ class CreateNetworkInfoAction(workflows.Action):
     def __init__(self, request, *args, **kwargs):
         super(CreateNetworkInfoAction, self).__init__(request,
                                                       *args, **kwargs)
-        if api.neutron.is_port_profiles_supported():
-            self.fields['net_profile_id'].choices = (
-                self.get_network_profile_choices(request))
-
-    def get_network_profile_choices(self, request):
-        profile_choices = [('', _("Select a profile"))]
-        for profile in self._get_profiles(request, 'network'):
-            profile_choices.append((profile.id, profile.name))
-        return profile_choices
-
-    def _get_profiles(self, request, type_p):
-        profiles = []
-        try:
-            profiles = api.neutron.profile_list(request, type_p)
-        except Exception:
-            msg = _('Network Profiles could not be retrieved.')
-            exceptions.handle(request, msg)
-        return profiles
-    # TODO(absubram): Add ability to view network profile information
-    # in the network detail if a profile is used.
 
     class Meta(object):
         name = _("Network")
@@ -361,8 +334,6 @@ class CreateNetwork(workflows.Workflow):
         try:
             params = {'name': data['net_name'],
                       'admin_state_up': (data['admin_state'] == 'True')}
-            if api.neutron.is_port_profiles_supported():
-                params['net_profile_id'] = data['net_profile_id']
             network = api.neutron.network_create(request, **params)
             self.context['net_id'] = network.id
             msg = (_('Network "%s" was successfully created.') %
@@ -388,11 +359,11 @@ class CreateNetwork(workflows.Workflow):
         if int(data['ip_version']) == 6:
             ipv6_modes = utils.get_ipv6_modes_attrs_from_menu(
                 data['ipv6_modes'])
-            if ipv6_modes[0] or is_update:
+            if ipv6_modes[0] and is_create:
                 params['ipv6_ra_mode'] = ipv6_modes[0]
-            if ipv6_modes[1] or is_update:
+            if ipv6_modes[1] and is_create:
                 params['ipv6_address_mode'] = ipv6_modes[1]
-        if is_create and data['allocation_pools']:
+        if data['allocation_pools']:
             pools = [dict(zip(['start', 'end'], pool.strip().split(',')))
                      for pool in data['allocation_pools'].split('\n')
                      if pool.strip()]

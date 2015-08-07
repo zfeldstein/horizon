@@ -197,14 +197,11 @@ LANGUAGES = (
     ('en-gb', 'British English'),
     ('es', 'Spanish'),
     ('fr', 'French'),
-    ('hi', 'Hindi'),
     ('ja', 'Japanese'),
     ('ko', 'Korean (Korea)'),
-    ('nl', 'Dutch (Netherlands)'),
     ('pl', 'Polish'),
     ('pt-br', 'Portuguese (Brazil)'),
     ('ru', 'Russian'),
-    ('sr', 'Serbian'),
     ('zh-cn', 'Simplified Chinese'),
     ('zh-tw', 'Chinese (Taiwan)'),
 )
@@ -260,11 +257,6 @@ ADD_INSTALLED_APPS = []
 # It can be overridden in local_settings.py
 CUSTOM_THEME_PATH = 'static/themes/default'
 
-try:
-    from local_settings import *  # noqa
-except ImportError:
-    logging.warning("No local_settings file found.")
-
 if not WEBROOT.endswith('/'):
     WEBROOT += '/'
 if LOGIN_URL is None:
@@ -279,6 +271,11 @@ MEDIA_URL = WEBROOT + 'media/'
 STATIC_ROOT = os.path.abspath(os.path.join(ROOT_PATH, '..', 'static'))
 STATIC_URL = WEBROOT + 'static/'
 STATICFILES_DIRS = get_staticfiles_dirs(WEBROOT)
+
+try:
+    from local_settings import *  # noqa
+except ImportError:
+    logging.warning("No local_settings file found.")
 
 CUSTOM_THEME = os.path.join(ROOT_PATH, CUSTOM_THEME_PATH)
 STATICFILES_DIRS.append(
