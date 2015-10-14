@@ -148,7 +148,7 @@ def keystoneclient(request, admin=False):
             endpoint_type = getattr(settings,
                                 'OPENSTACK_ENDPOINT_TYPE',
                                 'internalURL')
-       else:
+        else:
             if not policy.check((("identity", "admin_required"),), request):
                 raise exceptions.NotAuthorized
             endpoint_type = 'adminURL'
